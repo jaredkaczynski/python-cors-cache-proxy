@@ -35,12 +35,11 @@ def read_or_new_pickle(path, default):
 @app.route('/<path:url>', methods=method_requests_mapping.keys())
 def proxy(url):
     global new_dict
-    #print(new_dict)
-    parameter_hash = str(hash(frozenset(flask.request.args.items())));
-    key = url+parameter_hash
-    if(new_dict and parameter_hash in new_dict and int(new_dict[url][0]) > time()):
+    parameter_hash = "";
+    parameter_hash = hash(str(flask.request.full_path));
+    key = parameter_hash
+    if(new_dict and parameter_hash in new_dict and int(new_dict[parameter_hash][0]) > time()):
         print("cached")
-        print(new_dict[parameter_hash][0])
         print(url)
         print(time())
         resp = flask.Response(new_dict[parameter_hash][1])
@@ -53,11 +52,11 @@ def proxy(url):
                               content_type=request.headers['content-type'],
                               status=request.status_code)
     response.headers['Access-Control-Allow-Origin'] = '*'
-    new_dict[url]=[int(time())+5,response.data]
+    new_dict[parameter_hash]=[int(time())+5,response.data]
     print("new" + str(response))
     return response
 
 
 if __name__ == '__main__':
     app.debug = True
-    app.run(host='0.0.0.0',port="5001")
+    app.run(host='0.0.0.0',port=5001)
